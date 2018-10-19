@@ -1,0 +1,11 @@
+PW-DFT
+
+Sample DFT code for the lecture "Numerical Algebra for Materials Science"
+based on the plane wave and pseudopotential.
+
+# Contents
+
+* src/ : Source code directory
+
+# Compile
+
