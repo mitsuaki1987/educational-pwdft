@@ -1,3 +1,4 @@
 *.o
 *.mod
-make.sys
+*.x
+make.inc

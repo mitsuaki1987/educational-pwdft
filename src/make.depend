@@ -1,0 +1,5 @@
+atm_spec.o : atm_spec.F90 
+k_point.o : k_point.F90 
+pwdft.o : pwdft.F90 stdin.o 
+solver.o : solver.F90 
+stdin.o : stdin.F90 atm_spec.o k_point.o solver.o 
