@@ -1,10 +1,13 @@
 include ../make.inc
 
-include make.depend
-
 OBJS=\
 atm_spec.o \
+diag_direct.o \
+gvec.o \
+hamiltonian.o \
+io_vloc.o \
 k_point.o \
+lobpcg.o \
 pwdft.o \
 solver.o \
 stdin.o
@@ -22,3 +25,5 @@ pwdft.x:$(OBJS)
 
 clean:
 	rm -rf *.o *.mod *.x
+
+include make.depend

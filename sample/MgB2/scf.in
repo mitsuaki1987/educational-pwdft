@@ -4,7 +4,8 @@
 &SYSTEM
          nat = 3
         ntyp = 2
-ecutwfc = 48.000000
+ecutwfc = 25.000000
+ecutrho = 100.0
 nbnd = 10
 /
 CELL_PARAMETERS

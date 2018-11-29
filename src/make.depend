@@ -1,5 +1,10 @@
 atm_spec.o : atm_spec.F90 
+diag_direct.o : diag_direct.F90 gvec.o 
+gvec.o : gvec.F90 atm_spec.o 
+hamiltonian.o : hamiltonian.F90 solver.o gvec.o 
+io_vloc.o : io_vloc.F90 gvec.o atm_spec.o 
 k_point.o : k_point.F90 
-pwdft.o : pwdft.F90 stdin.o 
+lobpcg.o : lobpcg.F90 hamiltonian.o solver.o 
+pwdft.o : pwdft.F90 io_vloc.o gvec.o stdin.o solver.o 
 solver.o : solver.F90 
-stdin.o : stdin.F90 atm_spec.o k_point.o solver.o 
+stdin.o : stdin.F90 gvec.o atm_spec.o k_point.o solver.o 

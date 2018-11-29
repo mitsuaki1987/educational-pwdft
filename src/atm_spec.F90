@@ -13,9 +13,9 @@ module atm_spec
      character(256) :: ps_file
   end type spec_t
   !
-  integer :: nat, ntyp
-  real(8) :: avec(3,3)
-  type(atm_t),allocatable :: atm(:)
-  type(spec_t),allocatable :: spec(:)
+  integer,save :: nat, ntyp
+  real(8),save :: avec(3,3), bvec(3,3)
+  type(atm_t),allocatable,save :: atm(:)
+  type(spec_t),allocatable,save :: spec(:)
   !
 end module atm_spec
