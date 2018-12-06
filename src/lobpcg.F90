@@ -7,17 +7,17 @@ contains
   subroutine initialize(psi)
     !
     use solver, only : nbnd
-    use gvec, only : wfft
+    use gvec, only : g_wf
     !
-    complex(8),intent(out) :: psi(wfft%npw,nbnd)
+    complex(8),intent(out) :: psi(g_wf%npw,nbnd)
     !
-    real(8) :: rpsi(wfft%npw,nbnd), ipsi(wfft%npw,nbnd)
+    real(8) :: rpsi(g_wf%npw,nbnd), ipsi(g_wf%npw,nbnd)
     !
     call random_number(rpsi)
     call random_number(ipsi)
     !
-    psi(1:wfft%npw,1:nbnd) = cmplx(rpsi(1:wfft%npw,1:nbnd), &
-    &                              ipsi(1:wfft%npw,1:nbnd), 8)
+    psi(1:g_wf%npw,1:nbnd) = cmplx(rpsi(1:g_wf%npw,1:nbnd), &
+    &                              ipsi(1:g_wf%npw,1:nbnd), 8)
     !
   end subroutine initialize
   !
@@ -66,13 +66,13 @@ contains
     !
   end subroutine diag_ovrp
   !
-  subroutine lobpcg_main(linit,npw,nbnd,kvec,evec,eval)
+  subroutine lobpcg_main(linit,npw,kvec,evec,eval)
     !
-    use solver, only : electron_maxstep
+    use solver, only : electron_maxstep, nbnd
     use hamiltonian, only : h_psi
     !
     logical,intent(in) :: linit
-    integer,intent(in) :: npw, nbnd
+    integer,intent(in) :: npw
     real(8),intent(in) :: kvec(3)
     real(8),intent(out) :: eval(nbnd)
     complex(8),intent(out) :: evec(npw,nbnd)

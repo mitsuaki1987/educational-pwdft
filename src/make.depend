@@ -1,10 +1,15 @@
 atm_spec.o : atm_spec.F90 
-diag_direct.o : diag_direct.F90 gvec.o 
-gvec.o : gvec.F90 atm_spec.o 
-hamiltonian.o : hamiltonian.F90 solver.o gvec.o 
-io_vloc.o : io_vloc.F90 gvec.o atm_spec.o 
-k_point.o : k_point.F90 
-lobpcg.o : lobpcg.F90 hamiltonian.o solver.o 
-pwdft.o : pwdft.F90 io_vloc.o gvec.o stdin.o solver.o 
+constant.o : constant.F90 
+diag_direct.o : diag_direct.F90 fftw_wrapper.o io_vloc.o gvec.o solver.o 
+fftw_wrapper.o : fftw_wrapper.F90 atm_spec.o gvec.o 
+gvec.o : gvec.F90 atm_spec.o constant.o 
+hamiltonian.o : hamiltonian.F90 fftw_wrapper.o solver.o gvec.o 
+hartree.o : hartree.F90 fftw_wrapper.o io_vloc.o atm_spec.o gvec.o constant.o 
+io_vloc.o : io_vloc.F90 gvec.o atm_spec.o constant.o 
+k_point.o : k_point.F90 solver.o 
+lobpcg.o : lobpcg.F90 hamiltonian.o gvec.o solver.o 
+pp.o : pp.F90 solver.o atm_spec.o 
+pwdft.o : pwdft.F90 pp.o k_point.o diag_direct.o io_vloc.o gvec.o stdin.o solver.o 
+scf.o : scf.F90 atm_spec.o io_vloc.o hartree.o k_point.o constant.o solver.o gvec.o 
 solver.o : solver.F90 
-stdin.o : stdin.F90 gvec.o atm_spec.o k_point.o solver.o 
+stdin.o : stdin.F90 gvec.o atm_spec.o k_point.o solver.o constant.o 

@@ -3,26 +3,31 @@ module gvec
   implicit none
   !
   type fft
-     integer :: npw
-     integer :: npw3(3)
-     integer,allocatable :: mill(:,:)
-     real(8),allocatable :: gv(:,:)
+     integer :: &
+     & nft(3), & !< FFT grid
+     & nr, &  !< Number of r in whole grid, product(nft(1:3))
+     & npw !< Number of PW inside sphere
+     integer,allocatable :: &
+     & map(:), & !< (npw) npw(sphere) -> nr(grid) mapper
+     & mill(:,:) !< (3,npw) Miller index  
   end type fft
   !
-  type(fft),save :: rfft
-  type(fft),save :: wfft
+  type(fft),save :: g_rh
+  type(fft),save :: g_wf
   !
 contains
   !
   subroutine setup_gvec(xfft,g2cut)
     !
+    use constant, only : pi
     use atm_spec, only : avec, bvec
     !
     real(8),intent(in) :: g2cut
     type(fft),intent(out) :: xfft
     !
     integer :: ii, i1, i2, i3, nmax3(3), nmax
-    real(8) :: pi = acos(-1.0d0), norm, gv0(3), g2
+    real(8) :: norm, gv0(3), g2
+    integer,allocatable :: mill0(:,:)
     !
     do ii = 1, 3
        norm = sqrt(dot_product(avec(1:3,ii), avec(1:3,ii)))
@@ -30,33 +35,57 @@ contains
     end do
     !
     nmax = product(nmax3(1:3)*2+1)
-    allocate(xfft%gv(3,nmax), xfft%mill(3,nmax))
+    allocate(mill0(3,nmax))
     !
     xfft%npw = 0
-    do i1 = -nmax3(1), nmax3(1)
+    do i3 = -nmax3(3), nmax3(3)
        do i2 = -nmax3(2), nmax3(2)
-          do i3 = -nmax3(3), nmax3(3)
+          do i1 = -nmax3(1), nmax3(1)
              gv0(1:3) = matmul(bvec(1:3,1:3), dble((/i1,i2,i3/)))
              g2 = dot_product(gv0,gv0)
              if(g2 < g2cut) then
                 xfft%npw = xfft%npw + 1
-                xfft%mill(1:3,xfft%npw) = (/i1,i2,i3/)
-                xfft%gv(1:3,xfft%npw) = gv0(1:3)
+                mill0(1:3,xfft%npw) = (/i1,i2,i3/)
              end if
           end do
        end do
     end do
     !
-    write(*,*) "    Numver of PW : ", xfft%npw
+    write(*,*) "    Numver of PW inside sphere : ", xfft%npw
     !
     ! Find FFT grid
     !
     do ii = 1, 3
-       xfft%npw3(ii) = maxval(xfft%mill(ii,1:xfft%npw))*2 + 1
-       call base2357(xfft%npw3(ii))
+       xfft%nft(ii) = maxval(xfft%mill(ii,1:xfft%npw))*2 + 1
+       call base2357(xfft%nft(ii))
     end do
     !
-    write(*,*) "    FFT grid : ", xfft%npw3(1:3)
+    write(*,*) "    FFT grid : ", xfft%nft(1:3)
+    xfft%nr = product(xfft%nft(1:3))
+    write(*,*) "    Numver of PW in grid : ", xfft%nr
+    allocate(xfft%mill(3,xfft%nr), xfft%map(xfft%npw))
+    !
+    ! Whole grid : Miller index
+    !
+    ii = 0
+    do i3 = 0, xfft%nft(3) - 1
+       do i2 = 0, xfft%nft(2) - 1
+          do i1 = 0, xfft%nft(1) - 1
+             ii = ii + 1
+             xfft%mill(1:3,ii) = modulo((/i1, i2, i3/) + xfft%nft(1:3)/2, xfft%nft(1:3)) &
+             &                                         - xfft%nft(1:3)/2
+          end do
+       end do
+    end do
+    !
+    ! Mapper
+    !
+    do ii = 1, xfft%npw
+       mill0(1:3,ii) = modulo(mill0(1:3,ii), xfft%nft(1:3))
+       xfft%map(ii) = 1 + mill0(1,ii) + xfft%nft(1)*(mill0(2,ii) + xfft%nft(2)*mill0(3,ii))
+    end do
+    !
+    deallocate(mill0)
     !
   end subroutine setup_gvec
   !

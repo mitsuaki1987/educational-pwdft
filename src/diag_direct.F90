@@ -4,58 +4,55 @@ module diag_direct
   !
 contains
   !
-  subroutine direct(kvec,evec,eval)
+  subroutine direct(npw,kvec,evec,eval)
     !
+    use atm_spec, only : bvec
     use solver, only : nbnd
-    use gvec, only : rfft, wfft
-    use io_vloc, only : Vloc
+    use gvec, only : g_rh, g_wf
+    use io_vloc, only : Vks
+    use fftw_wrapper, only : fft_r2g
     !
+    integer,intent(in) :: npw
     real(8),intent(in) :: kvec(3)
-    complex(8),intent(out) :: evec(wfft%npw,nbnd)
-    complex(8),intent(out) :: eval(nbnd)
+    complex(8),intent(out) :: evec(npw,nbnd)
+    real(8),intent(out) :: eval(nbnd)
     !
     integer :: info, ipw, jpw, lwork, dmill(3)
-    real(8) :: rwork(3*wfft%npw-2), eval_full(wfft%npw), kgv(3)
-    complex(8) :: ham(wfft%npw,wfft%npw), &
-    &             VlocG(rfft%npw3(1), rfft%npw3(2), rfft%npw3(3))
+    real(8) :: rwork(3*npw-2), eval_full(npw), kgv(3)
+    complex(8) :: ham(npw,npw), &
+    &             VksG(g_rh%nft(1), g_rh%nft(2), g_rh%nft(3))
     complex(8),allocatable :: work(:)
-    !
-    include 'fftw3.f'
-    integer(8) :: plan
     !
     ! Local potential term
     !
-    call dfftw_plan_dft_3d(plan, rfft%npw3(1), rfft%npw3(2), rfft%npw3(3), Vloc, VlocG, &
-    &                      fftw_forward, fftw_estimate)
-    call dfftw_execute_dft(plan, Vloc, VlocG)
-    call dfftw_destroy_plan(plan)
+    call fft_r2G(Vks, VksG)
     !
-    do ipw = 1, wfft%npw
-       do jpw = 1, wfft%npw
-          dmill(1:3) = wfft%mill(1:3,jpw) - wfft%mill(1:3,ipw)
-          dmill(1:3) = modulo(dmill(1:3), rfft%npw3(1:3)) + 1
-          ham(jpw,ipw) = VlocG(dmill(1), dmill(2), dmill(3))
+    do ipw = 1, npw
+       do jpw = 1, npw
+          dmill(1:3) = g_wf%mill(1:3,g_wf%map(jpw)) - g_wf%mill(1:3,g_wf%map(ipw))
+          dmill(1:3) = modulo(dmill(1:3), g_rh%nft(1:3)) + 1
+          ham(jpw,ipw) = VksG(dmill(1), dmill(2), dmill(3))
        end do
     end do
     !
     ! Kinetic energy term
     !
-    do ipw = 1, wfft%npw
-       kgv(1:3) = kvec(1:3) + wfft%gv(1:3,ipw)
+    do ipw = 1, npw
+       kgv(1:3) = kvec(1:3) + matmul(bvec(1:3,1:3), dble(g_wf%mill(1:3,g_wf%map(ipw))))
        ham(ipw,ipw) = ham(ipw,ipw) + 0.5d0 * dot_product(kgv,kgv)
     end do
     !
     lwork = -1
     allocate(work(1))
-    call zheev('V', 'U', wfft%npw, ham, wfft%npw, eval_full, work, lwork, rwork, info)
+    call zheev('V', 'U', npw, ham, npw, eval_full, work, lwork, rwork, info)
     lwork = nint(dble(work(1)))
     deallocate(work)
     allocate(work(lwork))
-    call zheev('V', 'U', wfft%npw, ham, wfft%npw, eval_full, work, lwork, rwork, info)
+    call zheev('V', 'U', npw, ham, npw, eval_full, work, lwork, rwork, info)
     deallocate(work)
     !
-    eval(           1:nbnd) = eval_full(     1:nbnd)
-    evec(1:wfft%npw,1:nbnd) = ham(1:wfft%npw,1:nbnd)
+    eval(      1:nbnd) = eval_full(1:nbnd)
+    evec(1:npw,1:nbnd) = ham(1:npw,1:nbnd)
     !
   end subroutine direct
   !
