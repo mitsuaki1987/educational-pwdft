@@ -1,0 +1,3 @@
+FC = gfortran
+FFLAGS = -g -fbacktrace -Wall -Wextra -fcheck=all -I /usr/local/brew/include/ -framework Accelerate -lm
+LDFLAGS = -L /usr/local/brew/lib/ -lfftw3
