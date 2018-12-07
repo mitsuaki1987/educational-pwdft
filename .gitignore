@@ -4,3 +4,4 @@
 make.inc
 *~
 doc/html/
+*.a
