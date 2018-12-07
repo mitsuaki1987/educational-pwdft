@@ -10,11 +10,12 @@ module fftw_wrapper
   & w2r(:) !< (g_wf%npw) g_wf%npw -> g_rh%nr
   !
   complex(8),allocatable,save :: &
-  & fft_buffer(:) !< (g_rh%nr) FFT buffer
+  & fft_in(:), & !< (g_rh%nr) FFT buffer
+  & fft_out(:) !< (g_rh%nr) FFT buffer
   !
   include "fftw3.f"
   !
-  private plan_g2r, plan_r2g, fft_buffer
+  private plan_g2r, plan_r2g, fft_in, fft_out
   !
 contains
   !
@@ -24,14 +25,14 @@ contains
     !
     integer :: ipw, igv(3)
     !
-    allocate(fft_buffer(g_rh%nr))
+    allocate(fft_in(g_rh%nr), fft_out(g_rh%nr))
     !
     call dfftw_plan_dft_3d(plan_G2r, g_rh%nft(1), g_rh%nft(2), g_rh%nft(3), &
-    &                      fft_buffer, fft_buffer, &
+    &                      fft_in, fft_out, &
     &                      fftw_backward, fftw_estimate)
     !
     call dfftw_plan_dft_3d(plan_r2G, g_rh%nft(1), g_rh%nft(2), g_rh%nft(3), &
-    &                      fft_buffer, fft_buffer, &
+    &                      fft_in, fft_out, &
     &                      fftw_forward, fftw_estimate)
     !
     allocate(w2r(g_wf%npw))
@@ -52,9 +53,9 @@ contains
     real(8),intent(in) :: VlocR(g_rh%nr)
     complex(8),intent(out) :: VlocG(g_rh%nr)
     !
-    fft_buffer(1:g_rh%nr) = VlocR(1:g_rh%nr)
-    call dfftw_execute_dft(plan_r2g, fft_buffer, fft_buffer)
-    VlocG(1:g_rh%nr) = fft_buffer(1:g_rh%nr) / dble(g_rh%nr)
+    fft_in(1:g_rh%nr) = VlocR(1:g_rh%nr)
+    call dfftw_execute_dft(plan_r2g, fft_in, fft_out)
+    VlocG(1:g_rh%nr) = fft_out(1:g_rh%nr) / dble(g_rh%nr)
     !
   end subroutine fft_r2g
   !>
@@ -67,9 +68,9 @@ contains
     complex(8),intent(in) :: VlocG(g_rh%nr)
     real(8),intent(out) :: VlocR(g_rh%nr)
     !
-    fft_buffer(1:g_rh%nr) = VlocG(1:g_rh%nr)
-    call dfftw_execute_dft(plan_g2r, fft_buffer, fft_buffer)
-    VlocR(1:g_rh%nr) = dble(fft_buffer(1:g_rh%nr))
+    fft_in(1:g_rh%nr) = VlocG(1:g_rh%nr)
+    call dfftw_execute_dft(plan_g2r, fft_in, fft_out)
+    VlocR(1:g_rh%nr) = dble(fft_out(1:g_rh%nr))
     !
   end subroutine fft_g2r
   !>
@@ -83,9 +84,9 @@ contains
     complex(8),intent(in) :: wfR(g_rh%nr)
     complex(8),intent(out) :: wfG(g_wf%npw)
     !
-    fft_buffer(1:g_rh%nr) = wfR(1:g_rh%nr)
-    call dfftw_execute_dft(plan_r2g, fft_buffer, fft_buffer)
-    wfG(1:g_wf%npw) = fft_buffer(w2r(1:g_wf%npw)) * sqrt(Vcell) / dble(g_rh%nr)
+    fft_in(1:g_rh%nr) = wfR(1:g_rh%nr)
+    call dfftw_execute_dft(plan_r2g, fft_in, fft_out)
+    wfG(1:g_wf%npw) = fft_out(w2r(1:g_wf%npw)) * sqrt(Vcell) / dble(g_rh%nr)
     !
   end subroutine fft_r2g_w
   !>
@@ -99,10 +100,10 @@ contains
     complex(8),intent(in) :: wfG(g_wf%npw)
     complex(8),intent(out) :: wfR(g_rh%nr)
     !
-    fft_buffer(1:g_rh%nr) = 0.0d0
-    fft_buffer(w2r(1:g_wf%npw)) = wfG(1:g_wf%npw)
-    call dfftw_execute_dft(plan_g2r, fft_buffer, fft_buffer)
-    wfR(1:g_rh%nr) = fft_buffer(1:g_rh%nr) / sqrt(Vcell)
+    fft_in(1:g_rh%nr) = 0.0d0
+    fft_in(w2r(1:g_wf%npw)) = wfG(1:g_wf%npw)
+    call dfftw_execute_dft(plan_g2r, fft_in, fft_out)
+    wfR(1:g_rh%nr) = fft_out(1:g_rh%nr) / sqrt(Vcell)
     !
   end subroutine fft_g2r_w
   !
