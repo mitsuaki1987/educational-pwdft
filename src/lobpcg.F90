@@ -6,18 +6,28 @@ contains
   !
   subroutine initialize(psi)
     !
-    use solver, only : nbnd
+    use kohn_sham, only : nbnd
     use gvec, only : g_wf
     !
     complex(8),intent(out) :: psi(g_wf%npw,nbnd)
     !
-    real(8) :: rpsi(g_wf%npw,nbnd), ipsi(g_wf%npw,nbnd)
+    integer :: ibnd, nseed
+    integer :: seed(256)
+    real(8) :: rpsi(g_wf%npw,nbnd), ipsi(g_wf%npw,nbnd), norm
     !
+    call random_seed(size=nseed)
+    seed(1:nseed)=2
+    call random_seed(put=seed)
     call random_number(rpsi)
     call random_number(ipsi)
     !
     psi(1:g_wf%npw,1:nbnd) = cmplx(rpsi(1:g_wf%npw,1:nbnd), &
     &                              ipsi(1:g_wf%npw,1:nbnd), 8)
+    !
+    do ibnd = 1, nbnd
+       norm = sqrt(dble(dot_product(psi(1:g_wf%npw,ibnd), psi(1:g_wf%npw,ibnd))))
+       psi(1:g_wf%npw,ibnd) = psi(1:g_wf%npw,ibnd) / norm
+    end do
     !
   end subroutine initialize
   !
@@ -68,8 +78,10 @@ contains
   !
   subroutine lobpcg_main(linit,npw,kvec,evec,eval)
     !
-    use solver, only : electron_maxstep, nbnd
+    use kohn_sham, only : nbnd, calculation
     use hamiltonian, only : h_psi
+    use atm_spec, only : bvec
+    use gvec, only : g_wf
     !
     logical,intent(in) :: linit
     integer,intent(in) :: npw
@@ -77,11 +89,16 @@ contains
     real(8),intent(out) :: eval(nbnd)
     complex(8),intent(out) :: evec(npw,nbnd)
     !
-    integer :: ii, ibnd, iter, nsub
-    real(8) :: norm
+    integer :: ii, ibnd, istep, nsub, ipw, cg_maxstep = 100
+    real(8) :: norm, maxnorm, ekin(npw), pre(npw), gv(3), ekin0, cg_thr = 1.0d-4
     complex(8) :: wxp(npw,nbnd,3), hwxp(npw,nbnd,3), xp(npw,nbnd,2:3), &
     &             hsub(nbnd,3,3*nbnd), ovlp(3*nbnd,3*nbnd), rotmat(nbnd,3,nbnd,2:3)
     !
+    do ipw = 1, g_wf%npw
+       gv(1:3) = matmul(bvec(1:3,1:3), dble(g_wf%mill(1:3,g_wf%map(ipw))))
+       ekin(ipw) = dot_product(gv,gv)
+    end do
+    !             
     nsub = 3 * nbnd
     xp(  1:npw,1:nbnd,2:3) = 0.0d0
     wxp( 1:npw,1:nbnd,1:3) = 0.0d0
@@ -95,16 +112,34 @@ contains
        eval(ibnd) = dble(dot_product(wxp(1:npw,ibnd,2), hwxp(1:npw,ibnd,2)))
     end do
     !
-    do iter = 1, electron_maxstep
+    if(calculation=="iterative") write(*,*) "Step  Residual"
+    !
+    do istep = 1, cg_maxstep
        !
+       maxnorm = 0.0d0
        do ibnd = 1, nbnd
           !
           wxp(1:npw,ibnd,1) = hwxp(1:npw,ibnd,2) - eval(ibnd) * wxp(1:npw,ibnd,2)
-          ! todo precondition
+          norm = sqrt(dble(dot_product(wxp(1:npw,ibnd,1), wxp(1:npw,ibnd,1))))
+          maxnorm = max(norm, maxnorm)
+          !
+          ! Preconditioning
+          !
+          ekin0 = sum(dble(conjg(wxp(1:npw,ibnd,2))*(wxp(1:npw,ibnd,2))*ekin(1:npw)))
+          pre(1:npw) = ekin(1:npw) / ekin0
+          pre(1:npw) = (27.0d0 + pre(1:npw)*(18.0d0 + pre(1:npw)*(12.0d0 * pre(1:npw)*8.0d0))) &
+          &          / (27.0d0 + pre(1:npw)*(18.0d0 + pre(1:npw)*(12.0d0 + pre(1:npw)*(8.0d0 + pre(1:npw)*16.0d0))))
+          !
+          wxp(1:npw,ibnd,1) = wxp(1:npw,ibnd,1) * pre(1:npw)
+          !
+          ! Normalize
+          !
           norm = sqrt(dble(dot_product(wxp(1:npw,ibnd,1), wxp(1:npw,ibnd,1))))
           wxp(1:npw,ibnd,1) = wxp(1:npw,ibnd,1) / norm
           !
        end do
+       if(calculation == "iterative") write(*,*) "    ", istep, maxnorm
+       if(maxnorm < cg_thr) exit
        !
        call h_psi(kvec,wxp(1:npw,1:nbnd,1), hwxp(1:npw,1:nbnd,1))
        !
@@ -120,10 +155,10 @@ contains
        rotmat(1:nbnd,  2,1:nbnd,3) = 0.0d0
        rotmat(1:nbnd,  3,1:nbnd,3) = hsub(1:nbnd,  3,1:nbnd)
        !
-       call zgemm("C", "N", npw, 2*nbnd, 3*nbnd, &
+       call zgemm("N", "N", npw, 2*nbnd, 3*nbnd, &
        &          (1.0d0,0.0d0), wxp, npw, rotmat, 3*nbnd, (0.0d0,0.0d0), xp, npw)
        wxp(1:npw,1:nbnd,2:3) = xp(1:npw,1:nbnd,2:3)
-       call zgemm("C", "N", npw, 2*nbnd, 3*nbnd, &
+       call zgemm("N", "N", npw, 2*nbnd, 3*nbnd, &
        &          (1.0d0,0.0d0), hwxp, npw, rotmat, 3*nbnd, (0.0d0,0.0d0), xp, npw)
        hwxp(1:npw,1:nbnd,2:3) = xp(1:npw,1:nbnd,2:3)
        !
@@ -136,6 +171,10 @@ contains
        end do
        !
     end do
+    !
+    if(istep >= cg_maxstep) then
+       write(*,*) "Not converged at kvec : ", kvec(1:3), maxnorm
+    end if
     !
     evec(1:npw,1:nbnd) = wxp(1:npw,1:nbnd,2)
     !

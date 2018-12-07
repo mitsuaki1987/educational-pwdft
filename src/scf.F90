@@ -2,27 +2,33 @@ module scf
   !
   implicit none
   !
+  integer,save :: &
+  & electron_maxstep !< Max number of iteration
+  real(8),save :: &
+  & mixing_beta, & !< Mixing for SCF
+  & conv_thr !< Convergence threshold [Htr]
+  !
 contains
   !
   subroutine scf_loop()
     !
     use gvec, only : g_rh
-    use solver, only : electron_maxstep, mixing_beta, conv_thr
-    use io_vloc, only : Vks
+    use rho_v, only : Vks
     use constant, only : htr2ev
     !
     integer :: istep, jstep
-    real(8) :: res, rhs(g_rh%nr), drhs(g_rh%nr), rhs0(g_rh%nr), dVks(g_rh%nr), &
-    &          jacob1(g_rh%nr,electron_maxstep), &
+   real(8) ::    jacob1(g_rh%nr,electron_maxstep), &
     &          jacob2(g_rh%nr,electron_maxstep), &
     &          alpha
-    !
-    call init_rho_V()
+   real(8) :: rhs0(g_rh%nr)
+   real(8) ::  dVks(g_rh%nr)
+    real(8) :: res, rhs(g_rh%nr)
+   real(8) :: drhs(g_rh%nr)
     !
     istep = 0
     write(*,*) "Iteration ", istep
     !
-    call kohn_sham(.true., rhs)
+    call kohn_sham_eq(.true., rhs)
     res = sqrt(dot_product(rhs(1:g_rh%nr), rhs(1:g_rh%nr))) / dble(g_rh%nr)
     write(*,*) "  delta Vks [eV] : ", res * htr2eV
     !
@@ -37,7 +43,7 @@ contains
        Vks(1:g_rh%nr) = Vks(1:g_rh%nr) + dVks(1:g_rh%nr)
        !
        rhs0(1:g_rh%nr) = rhs(1:g_rh%nr)
-       call kohn_sham(.false., rhs)
+       call kohn_sham_eq(.false., rhs)
        res = sqrt(dot_product(rhs(1:g_rh%nr), rhs(1:g_rh%nr))) / dble(g_rh%nr)
        write(*,*) "  delta Vks [eV] : ", res * htr2eV
        !
@@ -81,13 +87,12 @@ contains
   !
   !
   !
-  subroutine kohn_sham(linit,rhs)
+  subroutine kohn_sham_eq(linit,rhs)
     !
     use gvec, only : g_wf, g_rh
-    use solver, only : nbnd, eval, evec, calculation
+    use kohn_sham, only : nbnd, eval, evec, calculation
     use k_point, only : kvec, nk, ksum_rho
-    use hartree, only : hartree_pot, xc_pot
-    use io_vloc, only : Vks, Vps
+    use rho_v, only : Vks, Vps, hartree_pot, xc_pot
     use diag_direct, only : direct
     use lobpcg, only : lobpcg_main
     !
@@ -97,7 +102,9 @@ contains
     integer :: ik
     !
     if(calculation == "direct") then
-       call direct(g_wf%npw,kvec(1:3,1),evec(1:g_wf%npw,1:nbnd,1),eval(1:nbnd,1))
+       do ik = 1, nk
+          call direct(g_wf%npw,kvec(1:3,ik),evec(1:g_wf%npw,1:nbnd,ik),eval(1:nbnd,ik))
+       end do
     else
        do ik = 1, nk
           call lobpcg_main(linit, g_wf%npw, kvec(1:3,ik),&
@@ -119,23 +126,6 @@ contains
        rhs(1:g_rh%nr) = 0.0d0
     end if
     !
-  end subroutine kohn_sham
-  !
-  !
-  !
-  subroutine init_rho_V()
-    !
-    use gvec, only : g_rh
-    use io_vloc, only : rho, Vks, Vps
-    use hartree, only : hartree_pot, xc_pot
-    use atm_spec, only : Vcell, nelec
-    !
-    rho(1:g_rh%nr) = nelec / Vcell
-    !
-    Vks(1:g_rh%nr) = Vps(1:g_rh%nr)
-    call hartree_pot(Vks)
-    call xc_pot(Vks)
-    !
-  end subroutine init_rho_V
+  end subroutine kohn_sham_eq
   !
 end module scf

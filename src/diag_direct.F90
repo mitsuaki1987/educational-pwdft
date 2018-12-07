@@ -7,9 +7,9 @@ contains
   subroutine direct(npw,kvec,evec,eval)
     !
     use atm_spec, only : bvec
-    use solver, only : nbnd
+    use kohn_sham, only : nbnd
     use gvec, only : g_rh, g_wf
-    use io_vloc, only : Vks
+    use rho_v, only : Vks
     use fftw_wrapper, only : fft_r2g
     !
     integer,intent(in) :: npw

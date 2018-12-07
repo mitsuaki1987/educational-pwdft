@@ -7,7 +7,8 @@ contains
   subroutine read_stdin()
     !
     use constant, only : bohr2ang, pi, htr2ev
-    use solver, only : calculation, nbnd, electron_maxstep, conv_thr, mixing_beta
+    use kohn_sham, only : calculation, nbnd
+    use scf, only : electron_maxstep, conv_thr, mixing_beta
     use k_point, only : nk, kvec, kgrd
     use atm_spec, only : atm, spec, avec, nat, ntyp, bvec, Vcell
     use gvec, only : g_rh, g_wf, setup_gvec
@@ -82,8 +83,8 @@ contains
                    & + kvec(1:3,10* ii   +1) * dble(ik-1)/10.0d0
                 end do
              end do
-          else if (calculation == "direct") then
-             nk = 1
+          else if (calculation == "direct" .or. calculation == "iterative") then
+             read(*,*) nk
              allocate(kvec(3,nk))
              read(*,*) kvec(1:3,1:nk)
           else
@@ -91,9 +92,9 @@ contains
              nk = product(kgrd(1:3))
              allocate(kvec(3,nk))
              nk = 0
-             do i3 = 0, kgrd(3)
-                do i2 = 0, kgrd(2)
-                   do i1 = 0, kgrd(1)
+             do i3 = 0, kgrd(3) - 1
+                do i2 = 0, kgrd(2) - 1
+                   do i1 = 0, kgrd(1) - 1
                       nk = nk + 1
                       kvec(1:3,nk) = dble(modulo((/i1,i2,i3/)+kgrd(1:3)/2,kgrd(1:3)) &
                       &                                      -kgrd(1:3)/2) &
@@ -103,6 +104,8 @@ contains
              end do
           end if
           !
+          write(*,*) "  Number of k : ", nk
+          !
        else if(key == "CELL_PARAMETERS") then
           !
           read(*,*) avec(1:3,1:3)
@@ -110,7 +113,7 @@ contains
           write(*,*) "  Cell parameters [Bohr] :"
           !
           do ii = 1, 3
-             write(*,*) avec(1:3,ii)
+             write(*,*) "    ", avec(1:3,ii)
           end do
           Vcell = (avec(2,1)*avec(3,2) - avec(3,1)*avec(2,2)) * avec(1,3) &
           &     + (avec(3,1)*avec(1,2) - avec(1,1)*avec(3,2)) * avec(2,3) &
@@ -125,6 +128,10 @@ contains
           call dgetri(3, bvec, 3, ipiv, work, lwork, info)
           if(info /= 0) stop 'read_stdin : inverce of avec.'
           bvec(1:3,1:3) = 2.0d0 * pi * bvec(1:3,1:3)
+          write(*,*) "  Reciplocal lattice vector [Bohr^-1] :"
+          do ii = 1, 3
+             write(*,*) "    ", bvec(1:3,ii)
+          end do
           !
        end if
        !

@@ -1,15 +1,16 @@
 atm_spec.o : atm_spec.F90 
 constant.o : constant.F90 
-diag_direct.o : diag_direct.F90 fftw_wrapper.o io_vloc.o gvec.o solver.o 
+diag_direct.o : diag_direct.F90 fftw_wrapper.o rho_v.o gvec.o kohn_sham.o atm_spec.o 
 fftw_wrapper.o : fftw_wrapper.F90 atm_spec.o gvec.o 
+griddata.o : griddata.F90 gvec.o atm_spec.o constant.o 
 gvec.o : gvec.F90 atm_spec.o constant.o 
-hamiltonian.o : hamiltonian.F90 fftw_wrapper.o solver.o gvec.o 
-hartree.o : hartree.F90 fftw_wrapper.o io_vloc.o atm_spec.o gvec.o constant.o 
-io_vloc.o : io_vloc.F90 gvec.o atm_spec.o constant.o 
-k_point.o : k_point.F90 solver.o 
-lobpcg.o : lobpcg.F90 hamiltonian.o gvec.o solver.o 
-pp.o : pp.F90 solver.o atm_spec.o 
-pwdft.o : pwdft.F90 pp.o k_point.o diag_direct.o io_vloc.o gvec.o stdin.o solver.o 
-scf.o : scf.F90 atm_spec.o io_vloc.o hartree.o k_point.o constant.o solver.o gvec.o 
-solver.o : solver.F90 
-stdin.o : stdin.F90 gvec.o atm_spec.o k_point.o solver.o constant.o 
+hamiltonian.o : hamiltonian.F90 atm_spec.o rho_v.o fftw_wrapper.o kohn_sham.o gvec.o 
+k_point.o : k_point.F90 gvec.o rho_v.o fftw_wrapper.o kohn_sham.o atm_spec.o 
+kohn_sham.o : kohn_sham.F90 
+lobpcg.o : lobpcg.F90 atm_spec.o hamiltonian.o gvec.o kohn_sham.o 
+plot.o : plot.F90 k_point.o constant.o kohn_sham.o 
+pp.o : pp.F90 kohn_sham.o atm_spec.o 
+pwdft.o : pwdft.F90 plot.o griddata.o fftw_wrapper.o scf.o pp.o k_point.o rho_v.o gvec.o constant.o stdin.o kohn_sham.o 
+rho_v.o : rho_v.F90 fftw_wrapper.o constant.o atm_spec.o gvec.o 
+scf.o : scf.F90 lobpcg.o diag_direct.o k_point.o kohn_sham.o constant.o rho_v.o gvec.o 
+stdin.o : stdin.F90 gvec.o atm_spec.o k_point.o scf.o kohn_sham.o constant.o 

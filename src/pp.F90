@@ -7,7 +7,7 @@ contains
   subroutine read_pp()
     !
     use atm_spec, only : spec, ntyp, nelec, atm, nat
-    use solver, only : nbnd
+    use kohn_sham, only : nbnd
     !
     integer :: ityp, fi=10, iat
     integer :: pspd, pspcode, pspxc, lmax, lloc, r2well, &

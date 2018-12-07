@@ -12,9 +12,9 @@ contains
   subroutine ksum_rho()
     !
     use atm_spec, only : bvec, nelec
-    use solver, only : nbnd, ef, eval, evec
+    use kohn_sham, only : nbnd, ef, eval, evec
     use fftw_wrapper, only : fft_g2r_w
-    use io_vloc, only : rho
+    use rho_v, only : rho
     use gvec, only : g_rh, g_wf
     use libtetrabz, only : libtetrabz_fermieng
     !

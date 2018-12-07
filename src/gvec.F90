@@ -56,7 +56,7 @@ contains
     ! Find FFT grid
     !
     do ii = 1, 3
-       xfft%nft(ii) = maxval(xfft%mill(ii,1:xfft%npw))*2 + 1
+       xfft%nft(ii) = maxval(mill0(ii,1:xfft%npw))*2 + 1
        call base2357(xfft%nft(ii))
     end do
     !

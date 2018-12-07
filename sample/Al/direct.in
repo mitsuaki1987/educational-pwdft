@@ -1,15 +1,14 @@
 &CONTROL
- calculation = 'scf'
+ calculation = 'direct'
 /
 &SYSTEM
+nbnd = 10
          nat = 1
         ntyp = 1
-     ecutwfc = 30.000000
-     ecutrho = 120.000000
+     ecutwfc = 60.000000
+     ecutrho = 240.000000
 /
 &ELECTRONS
- mixing_beta = 0.3
- conv_thr = 1.000000e-5
 /
 CELL_PARAMETERS
  0.000000 2.024700 2.024700
@@ -17,7 +16,8 @@ CELL_PARAMETERS
  2.024700 2.024700 0.000000
 ATOMIC_SPECIES
  Al al.lda.lps
-ATOMIC_POSITIONS 
+ATOMIC_POSITIONS
  Al 0.000000 0.000000 0.000000
 K_POINTS
- 8 8 8
+1
+0.0 0.0 0.0

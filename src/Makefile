@@ -5,22 +5,23 @@ atm_spec.o \
 constant.o \
 diag_direct.o \
 fftw_wrapper.o \
+griddata.o \
 gvec.o \
 hamiltonian.o \
-hartree.o \
-io_vloc.o \
 k_point.o \
+kohn_sham.o \
 lobpcg.o \
+plot.o \
 pp.o \
 pwdft.o \
+rho_v.o \
 scf.o \
-solver.o \
 stdin.o
 
 .SUFFIXES :
 .SUFFIXES : .o .F90
 
-all:pwdft.x
+all:tetra pwdft.x
 
 .F90.o:
 	$(FC) $(FFLAGS) -I./libtetrabz/ -c $<

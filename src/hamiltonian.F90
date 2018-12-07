@@ -7,9 +7,9 @@ contains
   subroutine h_psi(kvec,psi, hpsi)
     !
     use gvec, only : g_wf, g_rh
-    use solver, only : nbnd
+    use kohn_sham, only : nbnd
     use fftw_wrapper, only : fft_g2r_w, fft_r2g_w
-    use io_vloc, only : Vks
+    use rho_v, only : Vks
     use atm_spec, only : bvec
     !
     real(8),intent(in) :: kvec(3)

@@ -1,4 +1,4 @@
-module io_vloc
+module rho_v
   !
   implicit none
   !
@@ -8,66 +8,27 @@ module io_vloc
   & rho(:) !< (g_rh%nr) Charge density
   !
 contains
-  !
-  subroutine read_vks()
+  !>
+  !! Initialize rho, Vps, Vks
+  !!
+  subroutine init_rho_V()
     !
-    use constant, only : pi, htr2ev
-    use atm_spec, only : nat, atm, bvec, avec
     use gvec, only : g_rh
+    use atm_spec, only : Vcell, nelec
     !
-    integer :: itemp(3), fi = 10, iat
-    character(256) :: ctemp
-    real(8) :: avec0(3,3), &
-    &          Vks0(1:g_rh%nft(1)+1,1:g_rh%nft(2)+1,1:g_rh%nft(3)+1)
+    allocate(Vps(g_rh%nr), Vks(g_rh%nr), rho(g_rh%nr))
     !
-    open(fi, file = "vks.xsf")
+    rho(1:g_rh%nr) = nelec / Vcell
     !
-    read(fi,*) ctemp
-    read(fi,*) ctemp
-    read(fi,*) avec0(1:3,1:3)
-    avec0(1:3,1:3) = avec0(1:3,1:3) / 0.529177249d0
-    if(any(abs(avec0(1:3,1:3)-avec(1:3,1:3)) > 1.0d-3)) then
-       write(*,*) "Error in read_vks"
-       write(*,*) "Direct lattice vector is different."
-       stop 'error in read_vks'
-    end if
-    read(fi,*) ctemp
-    read(fi,*) itemp(1:2)
-    if(nat /= itemp(1)) then
-       write(*,*) "Error in read_vks"
-       write(*,*) "Number of atoms is different."
-       stop 'error in read_vks'
-    end if
-    do iat = 1, nat
-       read(fi,*) ctemp, avec0(1:3,1)
-       avec0(1:3,1) = avec0(1:3,1) / 0.529177249d0
-       avec0(1:3,1) = matmul(avec0(1:3,1), bvec(1:3,1:3)) / (2.0d0*pi)
-       if(any(abs(avec0(1:3,1)-atm(iat)%pos(1:3)) > 1.0d-3)) then
-          write(*,*) "Error in read_vks"
-          write(*,*) "Position of atom ", iat, " is different."
-          stop 'error in read_vks'
-       end if
-    end do
-    read(fi,*) ctemp
-    read(fi,*) ctemp
-    read(fi,*) ctemp 
-    read(fi,*) itemp(1:3)
-    if(any(itemp(1:3) /= g_rh%nft(1:3)+1)) then
-       write(*,*) "Error in read_vks"
-       write(*,*) "FFT grid is different."
-       stop 'error in read_vks'
-    end if
-    read(fi,*) avec0(1:3,1)
-    read(fi,*) avec0(1:3,1:3)
-    read(fi,*) Vks0(1:itemp(1),1:itemp(2),1:itemp(3))
-    Vks(1:g_rh%nr) = reshape(Vks0(1:g_rh%nft(1),1:g_rh%nft(2),1:g_rh%nft(3)), (/g_rh%nr/))
+    call generate_vps()
+    Vks(1:g_rh%nr) = Vps(1:g_rh%nr)
+    call hartree_pot(Vks)
+    call xc_pot(Vks)
     !
-    write(*,*) "  Average potential [eV] : ", &
-    &  sum(Vks(1:g_rh%nr)) / dble(g_rh%nr)
-    Vks(1:g_rh%nr) = Vks(1:g_rh%nr) / htr2ev
-    !
-  end subroutine read_vks
-  !
+  end subroutine init_rho_V
+  !>
+  !! Pseudopotential Vps is computed
+  !!
   subroutine generate_vps()
     !
     use constant, only : pi
@@ -129,8 +90,8 @@ contains
           !
           ctail = - spec(jtyp)%Zion * cos(sinc(spec(jtyp)%mmax)) / glen**2
           !
-          sinc(2:spec(jtyp)%mmax) = sin(sinc(1:spec(jtyp)%mmax)) &
-          &                       / sinc(    1:spec(jtyp)%mmax) &
+          sinc(2:spec(jtyp)%mmax) = sin(sinc(2:spec(jtyp)%mmax)) &
+          &                       / sinc(    2:spec(jtyp)%mmax) &
           &                       * dr
           sinc(1              ) = dr * 0.5d0
           sinc(spec(jtyp)%mmax) = sinc(spec(jtyp)%mmax) * 0.5d0
@@ -152,5 +113,78 @@ contains
     call fft_g2r(VpsG, Vps)
     !
   end subroutine generate_vps
+  !>
+  !! Add Hartree potential
+  !!
+  subroutine hartree_pot(Vloc)
+    !
+    use constant, only : pi
+    use gvec, only : g_rh
+    use atm_spec, only : bvec
+    use fftw_wrapper, only : fft_g2r, fft_r2g
+    !
+    real(8),intent(inout) :: Vloc(g_rh%nr)
+    !
+    integer :: ir
+    real(8) :: g3(3), VH(g_rh%nr)
+    complex(8) :: rhog(g_rh%nr)
+    !
+    call fft_r2G(rho, rhoG)
+    !
+    ! G = 0 : Compensation to the ionic potential 
+    !
+    rhog(1) = 0.0d0
+    !
+    do ir = 2, g_rh%nr
+       g3(1:3) = matmul(bvec(1:3,1:3), dble(g_rh%mill(1:3,ir)))
+       rhog(ir) = 4.0d0 * pi * rhog(ir) / dot_product(g3(1:3),g3(1:3))
+    end do
+    !
+    call fft_G2r(rhoG, VH)
+    !
+    Vloc(1:g_rh%nr) = Vloc(1:g_rh%nr) + VH(1:g_rh%nr)
+    !
+  end subroutine hartree_pot
+  !>
+  !! Add XC potential (LDA)
+  !!
+  subroutine xc_pot(Vloc)
+    !
+    use constant, only : pi
+    use gvec, only : g_rh
+    !
+    real(8),intent(inout) :: Vloc(g_rh%nr)
+    !
+    integer :: ir
+    real(8) :: rs, exc, Vxc
+    !
+    do ir = 1, g_rh%nr
+       !
+       if(rho(ir) > 1.0d-10) then
+          !
+          rs = (3.0d0 / (4.0d0 * pi * rho(ir)))**(1.0d0/3.0d0)
+          !
+          if(rs < 1.0d0) then
+             exc = -3.0d0 / (4.0d0*pi) * (9.0d0*pi/4)**(1.0d0/3.0d0) / rs &
+             &   - 0.0480d0 + 0.031d0*log(rs) - 0.0116d0*rs + 0.0020d0*rs*log(rs)
+             !
+             vxc = exc -1.0d0 / (4.0d0*pi) * (9.0d0*pi/4)**(1.0d0/3.0d0) / rs**2 &
+             & -0.0096d0*rs + 0.031d0 + 0.002d0*rs*log(rs)
+          else
+             exc = -3.0d0 / (4.0d0*pi) * (9.0d0*pi/4)**(1.0d0/3.0d0) / rs &
+             &   - 0.1423d0 / (1.0d0 + 1.0529d0*sqrt(rs) + 0.3334d0*rs)
+             !
+             vxc = exc -1.0d0 / (4.0d0*pi) * (9.0d0*pi/4)**(1.0d0/3.0d0) / rs**2 &
+             & - 0.0474333d0*(0.3334d0*rs + 0.52645*sqrt(rs)) &
+             & /(1.0d0 + 1.0529d0*sqrt(rs) + 0.3334d0*rs)**2
+          end if
+          !
+          Vloc(ir) = Vloc(ir) + vxc
+          !
+       end if
+       !
+    end do
+    !
+  end subroutine xc_pot
   !
-end module io_vloc
+end module rho_v
