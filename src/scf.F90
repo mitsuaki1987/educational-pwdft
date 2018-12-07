@@ -17,41 +17,35 @@ contains
     use constant, only : htr2ev
     !
     integer :: istep, jstep
-   real(8) ::    jacob1(g_rh%nr,electron_maxstep), &
-    &          jacob2(g_rh%nr,electron_maxstep), &
-    &          alpha
-   real(8) :: rhs0(g_rh%nr)
-   real(8) ::  dVks(g_rh%nr)
-    real(8) :: res, rhs(g_rh%nr)
-   real(8) :: drhs(g_rh%nr)
+    real(8) :: alpha, res
+    real(8),allocatable :: jacob1(:,:), jacob2(:,:), rhs0(:), dVks(:), rhs(:), drhs(:)
+    !
+    allocate(rhs0(g_rh%nr),dVks(g_rh%nr),rhs(g_rh%nr), drhs(g_rh%nr), &
+    &        jacob1(g_rh%nr,electron_maxstep), jacob2(g_rh%nr,electron_maxstep))
     !
     istep = 0
-    write(*,*) "Iteration ", istep
+    write(*,*) "  Iteration ", istep
     !
     call kohn_sham_eq(.true., rhs)
     res = sqrt(dot_product(rhs(1:g_rh%nr), rhs(1:g_rh%nr))) / dble(g_rh%nr)
-    write(*,*) "  delta Vks [eV] : ", res * htr2eV
+    write(*,*) "    delta Vks [eV] : ", res * htr2eV
     !
-    if(res < conv_thr) GOTO 5
+    if(res < conv_thr) electron_maxstep = 0
     !
     dVks(1:g_rh%nr) = - mixing_beta * rhs(1:g_rh%nr)
     !
     do istep = 1, electron_maxstep
        !
-       write(*,*) "Iteration ", istep
+       write(*,*) "  Iteration ", istep
        !
        Vks(1:g_rh%nr) = Vks(1:g_rh%nr) + dVks(1:g_rh%nr)
        !
        rhs0(1:g_rh%nr) = rhs(1:g_rh%nr)
        call kohn_sham_eq(.false., rhs)
        res = sqrt(dot_product(rhs(1:g_rh%nr), rhs(1:g_rh%nr))) / dble(g_rh%nr)
-       write(*,*) "  delta Vks [eV] : ", res * htr2eV
+       write(*,*) "    delta Vks [eV] : ", res * htr2eV
        !
-       if(res < conv_thr) then
-          !       
-          GOTO 5
-          !
-       end if
+       if(res < conv_thr) exit
        !
        ! Update Jacobian with drhs
        !
@@ -76,12 +70,11 @@ contains
        !
     end do ! istep
     !
-    write(*,'(/,7x,"Not converged ! res = ",e12.5,/)') res
-    RETURN
-    !
-5   CONTINUE
-    !
-    write(*,'(/,7x,"Converged ! iter = ",i0,/)') istep
+    if(istep >= electron_maxstep) then
+       write(*,'(/,7x,"Not converged ! res = ",e12.5,/)') res
+    else
+       write(*,'(/,7x,"Converged ! iter = ",i0,/)') istep
+    end if
     !
   end subroutine scf_loop
   !
@@ -99,17 +92,20 @@ contains
     logical,intent(in) :: linit
     real(8),intent(out) :: rhs(g_rh%nr)
     !
-    integer :: ik
+    integer :: ik, istep, avestep
     !
     if(calculation == "direct") then
        do ik = 1, nk
           call direct(g_wf%npw,kvec(1:3,ik),evec(1:g_wf%npw,1:nbnd,ik),eval(1:nbnd,ik))
        end do
     else
+       avestep = 0
        do ik = 1, nk
           call lobpcg_main(linit, g_wf%npw, kvec(1:3,ik),&
-          &                evec(1:g_wf%npw,1:nbnd,ik),eval(1:nbnd,ik))
+          &                evec(1:g_wf%npw,1:nbnd,ik),eval(1:nbnd,ik), istep)
+          avestep = avestep + istep
        end do
+       write(*,*) "    Average LOBPCG steps : ", avestep / nk
     end if
     !
     if(calculation == "scf") then

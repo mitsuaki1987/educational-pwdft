@@ -31,11 +31,11 @@ contains
     !
   end subroutine initialize
   !
-  subroutine diag_ovrp(nsub,hsub,ovlp,eval)
+  subroutine diag_ovrp(nsub,hsub,ovlp,esub)
     !
     integer,intent(in) :: nsub
     complex(8),intent(inout) :: hsub(nsub,nsub), ovlp(nsub,nsub)
-    real(8),intent(out) :: eval(nsub)
+    real(8),intent(out) :: esub(nsub)
     !
     integer :: lwork, isub, nsub2, info
     real(8) :: rwork(3*nsub-2)
@@ -43,18 +43,18 @@ contains
     !
     lwork = -1
     allocate(work(1))
-    call zheev('V', 'U', nsub, ovlp, nsub, eval, work, lwork, rwork, info)
+    call zheev('V', 'U', nsub, ovlp, nsub, esub, work, lwork, rwork, info)
     lwork = nint(dble(work(1)))
     deallocate(work)
     allocate(work(lwork))
-    call zheev('V', 'U', nsub, ovlp, nsub, eval, work, lwork, rwork, info) 
+    call zheev('V', 'U', nsub, ovlp, nsub, esub, work, lwork, rwork, info) 
     deallocate(work)
     !
     nsub2 = 0
     do isub = 1, nsub
-       if(eval(isub) > 1.0d-14) then
+       if(esub(isub) > 1.0d-14) then
           nsub2 = nsub2 + 1
-          ovlp(1:nsub,nsub2) = ovlp(1:nsub,isub) / sqrt(eval(isub))
+          ovlp(1:nsub,nsub2) = ovlp(1:nsub,isub) / sqrt(esub(isub))
        end if
     end do
     ovlp(1:nsub,nsub2+1:nsub) = 0.0d0
@@ -64,11 +64,11 @@ contains
     !
     lwork = -1
     allocate(work(1))
-    call zheev('V', 'U', nsub2, hsub, nsub, eval, work, lwork, rwork, info)
+    call zheev('V', 'U', nsub2, hsub, nsub, esub, work, lwork, rwork, info)
     lwork = nint(dble(work(1)))
     deallocate(work)
     allocate(work(lwork))    
-    call zheev('V', 'U', nsub2, hsub, nsub, eval, work, lwork, rwork, info)
+    call zheev('V', 'U', nsub2, hsub, nsub, esub, work, lwork, rwork, info)
     deallocate(work)
     !
     hsub(1:nsub, 1:nsub2) = matmul(ovlp(1:nsub,1:nsub2), hsub(1:nsub2,1:nsub2))
@@ -76,7 +76,7 @@ contains
     !
   end subroutine diag_ovrp
   !
-  subroutine lobpcg_main(linit,npw,kvec,evec,eval)
+  subroutine lobpcg_main(linit,npw,kvec,evec,eval,istep)
     !
     use kohn_sham, only : nbnd, calculation
     use hamiltonian, only : h_psi
@@ -88,9 +88,11 @@ contains
     real(8),intent(in) :: kvec(3)
     real(8),intent(out) :: eval(nbnd)
     complex(8),intent(out) :: evec(npw,nbnd)
+    integer,intent(out) :: istep
     !
-    integer :: ii, ibnd, istep, nsub, ipw, cg_maxstep = 100
-    real(8) :: norm, maxnorm, ekin(npw), pre(npw), gv(3), ekin0, cg_thr = 1.0d-4
+    integer :: ii, ibnd, nsub, ipw, cg_maxstep = 100
+    real(8) :: norm, maxnorm, ekin(npw), pre(npw), gv(3), ekin0, &
+    &          cg_thr = 1.0d-4, esub(3*nbnd)
     complex(8) :: wxp(npw,nbnd,3), hwxp(npw,nbnd,3), xp(npw,nbnd,2:3), &
     &             hsub(nbnd,3,3*nbnd), ovlp(3*nbnd,3*nbnd), rotmat(nbnd,3,nbnd,2:3)
     !
@@ -104,12 +106,13 @@ contains
     wxp( 1:npw,1:nbnd,1:3) = 0.0d0
     hwxp(1:npw,1:nbnd,1:3) = 0.0d0
     !
-    if(linit) call initialize(wxp(1:npw,1:nbnd,2))
+    if(linit) call initialize(evec(1:npw,1:nbnd))
+    wxp(1:npw,1:nbnd,2) = evec(1:npw,1:nbnd)
     !
     call h_psi(kvec,wxp(1:npw,1:nbnd,2), hwxp(1:npw,1:nbnd,2))
     !
     do ibnd = 1, nbnd
-       eval(ibnd) = dble(dot_product(wxp(1:npw,ibnd,2), hwxp(1:npw,ibnd,2)))
+       esub(ibnd) = dble(dot_product(wxp(1:npw,ibnd,2), hwxp(1:npw,ibnd,2)))
     end do
     !
     if(calculation=="iterative") write(*,*) "Step  Residual"
@@ -119,7 +122,7 @@ contains
        maxnorm = 0.0d0
        do ibnd = 1, nbnd
           !
-          wxp(1:npw,ibnd,1) = hwxp(1:npw,ibnd,2) - eval(ibnd) * wxp(1:npw,ibnd,2)
+          wxp(1:npw,ibnd,1) = hwxp(1:npw,ibnd,2) - esub(ibnd) * wxp(1:npw,ibnd,2)
           norm = sqrt(dble(dot_product(wxp(1:npw,ibnd,1), wxp(1:npw,ibnd,1))))
           maxnorm = max(norm, maxnorm)
           !
@@ -148,7 +151,7 @@ contains
        call zgemm("C", "N", 3*nbnd, 3*nbnd, npw, &
        &          (1.0d0,0.0d0), wxp, npw,  wxp, npw, (0.0d0,0.0d0), ovlp, 3*nbnd) 
        !
-       call diag_ovrp(nsub,hsub,ovlp,eval)
+       call diag_ovrp(nsub,hsub,ovlp,esub)
        !
        rotmat(1:nbnd,1:3,1:nbnd,2) = hsub(1:nbnd,1:3,1:nbnd)
        rotmat(1:nbnd,  1,1:nbnd,3) = hsub(1:nbnd,  1,1:nbnd)
@@ -173,10 +176,11 @@ contains
     end do
     !
     if(istep >= cg_maxstep) then
-       write(*,*) "Not converged at kvec : ", kvec(1:3), maxnorm
+       write(*,*) "      Not converged at kvec : ", kvec(1:3), ", norm :  ", maxnorm
     end if
     !
     evec(1:npw,1:nbnd) = wxp(1:npw,1:nbnd,2)
+    eval(1:nbnd) = esub(1:nbnd)
     !
   end subroutine lobpcg_main
   !
