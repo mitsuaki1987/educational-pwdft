@@ -26,7 +26,7 @@ all:tetra pwdft.x
 .F90.o:
 	$(FC) $(FFLAGS) -I./libtetrabz/ -c $<
 
-pwdft.x:$(OBJS) tetra
+pwdft.x:$(OBJS) libtetrabz/libtetrabz.a
 	$(FC) $(OBJS) $(FFLAGS) $(LDFLAGS) -L./libtetrabz/ -ltetrabz -o $@
 
 tetra:

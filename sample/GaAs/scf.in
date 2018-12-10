@@ -1,0 +1,25 @@
+&CONTROL
+ calculation = 'scf'
+/
+&SYSTEM
+         nat = 2
+        ntyp = 2
+     ecutwfc = 30.000000
+     ecutrho = 120.000000
+/
+&ELECTRONS
+ mixing_beta = 0.3
+ conv_thr = 2.000000e-10
+/
+CELL_PARAMETERS
+ 0.000000 2.826850 2.826850
+ 2.826850 0.000000 2.826850
+ 2.826850 2.826850 0.000000
+ATOMIC_SPECIES
+ As as.lda.lps
+ Ga ga.lda.lps
+ATOMIC_POSITIONS
+ Ga 0.00 0.00 0.00
+ As 0.25 0.25 0.25
+K_POINTS
+ 4 4 4

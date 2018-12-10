@@ -46,6 +46,8 @@ contains
     !
     do jtyp = 1, ntyp
        !
+       ! Structure factor
+       !
        nat2 = 0
        do iat = 1, nat
           if(atm(iat)%ityp == jtyp) then
@@ -54,12 +56,11 @@ contains
           end if
        end do
        !
-       ! Structure factor
-       !
        do ipw = 1, g_rh%nr
-          prod(1:nat2) = 2.0d0 * pi * matmul(dble(g_rh%mill(1:3,ipw)),pos2(1:3,1:nat2))
-          strfac(ipw) = sum(exp(cmplx(0.0d0, prod(1:nat), 8))) / Vcell
+          prod(1:nat2) = matmul(dble(g_rh%mill(1:3,ipw)),pos2(1:3,1:nat2))
+          strfac(ipw) = sum(exp(cmplx(0.0d0, - 2.0d0 * pi * prod(1:nat2), 8)))
        end do
+       strfac(1:g_rh%nr) = strfac(1:g_rh%nr) / Vcell
        !
        ! Form factor
        !

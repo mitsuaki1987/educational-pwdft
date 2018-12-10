@@ -93,6 +93,7 @@ contains
        end do
     end do
     !
+    write(*,*) "  Output ", trim(filename)
     open(fo, file = trim(filename))
     !
     write(fo,'(a)') "CRYSTAL"

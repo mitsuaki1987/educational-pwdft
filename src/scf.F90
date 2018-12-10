@@ -100,10 +100,13 @@ contains
        end do
     else
        avestep = 0
+       if(linit) call initialize_wf(evec(1:g_wf%npw,1:nbnd,1))
        do ik = 1, nk
-          call lobpcg_main(linit, g_wf%npw, kvec(1:3,ik),&
+          call lobpcg_main(g_wf%npw, kvec(1:3,ik),&
           &                evec(1:g_wf%npw,1:nbnd,ik),eval(1:nbnd,ik), istep)
           avestep = avestep + istep
+          if(linit .and. ik /= nk) evec(1:g_wf%npw,1:nbnd,ik+1) &
+          &                      = evec(1:g_wf%npw,1:nbnd,ik)
        end do
        write(*,*) "    Average LOBPCG steps : ", avestep / nk
     end if
@@ -123,5 +126,34 @@ contains
     end if
     !
   end subroutine kohn_sham_eq
+  !>
+  !! Initialize wave function with random number
+  !!
+  subroutine initialize_wf(psi)
+    !
+    use kohn_sham, only : nbnd
+    use gvec, only : g_wf
+    !
+    complex(8),intent(out) :: psi(g_wf%npw,nbnd)
+    !
+    integer :: ibnd, nseed
+    integer :: seed(256)
+    real(8) :: rpsi(g_wf%npw,nbnd), ipsi(g_wf%npw,nbnd), norm
+    !
+    call random_seed(size=nseed)
+    seed(1:nseed)=2
+    call random_seed(put=seed)
+    call random_number(rpsi)
+    call random_number(ipsi)
+    !
+    psi(1:g_wf%npw,1:nbnd) = cmplx(rpsi(1:g_wf%npw,1:nbnd), &
+    &                              ipsi(1:g_wf%npw,1:nbnd), 8)
+    !
+    do ibnd = 1, nbnd
+       norm = sqrt(dble(dot_product(psi(1:g_wf%npw,ibnd), psi(1:g_wf%npw,ibnd))))
+       psi(1:g_wf%npw,ibnd) = psi(1:g_wf%npw,ibnd) / norm
+    end do
+    !
+  end subroutine initialize_wf
   !
 end module scf

@@ -12,7 +12,7 @@ program pwdft
   use constant, only : htr2ev
   use gvec, only : g_rh, g_wf
   use rho_v, only : Vks, init_rho_v
-  use k_point, only : nk
+  use k_point, only : nk, ksum_dos
   use pp, only : read_pp
   use scf, only : scf_loop, kohn_sham_eq
   use fftw_wrapper, only : init_fft
@@ -63,8 +63,8 @@ program pwdft
      !
   end if
   !
-  eval(1:nbnd,1:nk) = eval(1:nbnd,1:nk) - ef
   if(calculation == "scf" .or. calculation=="nscf") then
+     call ksum_dos()
      call fermi_plot()
   else
      call band_plot()

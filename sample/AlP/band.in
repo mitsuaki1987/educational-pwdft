@@ -1,0 +1,31 @@
+&CONTROL
+ calculation = 'bands'
+/
+&SYSTEM
+         nat = 2
+        ntyp = 2
+     ecutwfc = 30.000000
+ecutrho = 120.000000
+nbnd = 10
+/
+&ELECTRONS
+ mixing_beta = 0.3
+ conv_thr = 2.000000e-10
+/
+CELL_PARAMETERS
+ 0.000000 2.725500 2.725500
+ 2.725500 0.000000 2.725500
+ 2.725500 2.725500 0.000000
+ATOMIC_SPECIES
+Al al.lda.lps
+P  p.lda.lps
+ATOMIC_POSITIONS
+ Al 0.000000 1.000000 0.000000
+ P -0.250000 0.750000 0.750000
+K_POINTS
+5
+0.000  0.000  0.000
+0.500  0.000  0.000
+0.625  0.375  0.000
+0.500  0.500  0.000
+0.000  0.000  0.000

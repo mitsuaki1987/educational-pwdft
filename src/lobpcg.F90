@@ -4,33 +4,6 @@ module lobpcg
   !
 contains
   !
-  subroutine initialize(psi)
-    !
-    use kohn_sham, only : nbnd
-    use gvec, only : g_wf
-    !
-    complex(8),intent(out) :: psi(g_wf%npw,nbnd)
-    !
-    integer :: ibnd, nseed
-    integer :: seed(256)
-    real(8) :: rpsi(g_wf%npw,nbnd), ipsi(g_wf%npw,nbnd), norm
-    !
-    call random_seed(size=nseed)
-    seed(1:nseed)=2
-    call random_seed(put=seed)
-    call random_number(rpsi)
-    call random_number(ipsi)
-    !
-    psi(1:g_wf%npw,1:nbnd) = cmplx(rpsi(1:g_wf%npw,1:nbnd), &
-    &                              ipsi(1:g_wf%npw,1:nbnd), 8)
-    !
-    do ibnd = 1, nbnd
-       norm = sqrt(dble(dot_product(psi(1:g_wf%npw,ibnd), psi(1:g_wf%npw,ibnd))))
-       psi(1:g_wf%npw,ibnd) = psi(1:g_wf%npw,ibnd) / norm
-    end do
-    !
-  end subroutine initialize
-  !
   subroutine diag_ovrp(nsub,hsub,ovlp,esub)
     !
     integer,intent(in) :: nsub
@@ -76,18 +49,17 @@ contains
     !
   end subroutine diag_ovrp
   !
-  subroutine lobpcg_main(linit,npw,kvec,evec,eval,istep)
+  subroutine lobpcg_main(npw,kvec,evec,eval,istep)
     !
     use kohn_sham, only : nbnd, calculation
     use hamiltonian, only : h_psi
     use atm_spec, only : bvec
     use gvec, only : g_wf
     !
-    logical,intent(in) :: linit
     integer,intent(in) :: npw
     real(8),intent(in) :: kvec(3)
     real(8),intent(out) :: eval(nbnd)
-    complex(8),intent(out) :: evec(npw,nbnd)
+    complex(8),intent(inout) :: evec(npw,nbnd)
     integer,intent(out) :: istep
     !
     integer :: ii, ibnd, nsub, ipw, cg_maxstep = 100
@@ -106,7 +78,6 @@ contains
     wxp( 1:npw,1:nbnd,1:3) = 0.0d0
     hwxp(1:npw,1:nbnd,1:3) = 0.0d0
     !
-    if(linit) call initialize(evec(1:npw,1:nbnd))
     wxp(1:npw,1:nbnd,2) = evec(1:npw,1:nbnd)
     !
     call h_psi(kvec,wxp(1:npw,1:nbnd,2), hwxp(1:npw,1:nbnd,2))

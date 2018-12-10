@@ -34,5 +34,51 @@ contains
     end do
     !
   end subroutine ksum_rho
+  !>
+  !! DOS
+  !!
+  subroutine ksum_dos()
+    !
+    use constant, only : htr2ev
+    use atm_spec, only : bvec
+    use kohn_sham, only : nbnd, ef, eval
+    use libtetrabz, only : libtetrabz_dos, libtetrabz_intdos
+    !
+    integer,parameter :: ne = 500
+    integer :: ie, fo = 20
+    real(8) :: e0(ne), dos(ne), intdos(ne), wght(ne,nbnd,nk), &
+    &          emax, emin, de
+    !
+    emax = maxval(eval(1:nbnd,1:nk))
+    emin = minval(eval(1:nbnd,1:nk))
+    de = (emax - emin) / dble(ne)
+    do ie = 1, ne
+       e0(ie) = emin + de * (ie -1)
+    end do
+    !
+    call libtetrabz_dos(2,bvec,nbnd,kgrd,eval,kgrd,wght,ne,e0)
+    !
+    do ie = 1, ne
+       dos(ie) = sum(wght(ie,1:nbnd,1:nk))
+    end do
+    !
+    call libtetrabz_intdos(2,bvec,nbnd,kgrd,eval,kgrd,wght,ne,e0)
+    !
+    do ie = 1, ne
+       intdos(ie) = sum(wght(ie,1:nbnd,1:nk))
+    end do
+    !
+    write(*,*) "  Output dos.dat"
+    open(fo, file = "dos.dat")
+    !
+    write(fo,*) "# Energy[eV]  DOS[eV^-1]  IntDOS"
+    !
+    do ie = 1, ne
+       write(fo,*) (e0(ie)-ef)*htr2eV, dos(ie)*2.0d0/htr2ev, intdos(ie)*2.0d0
+    end do
+    !
+    close(fo)
+    !
+  end subroutine ksum_dos
   !
 end module k_point
