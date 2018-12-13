@@ -1,19 +1,21 @@
 module fftw_wrapper
   !
+  use, intrinsic :: iso_c_binding
+  !
   implicit none
   !
-  integer(8),save :: &
+  include 'fftw3.f03'
+  !
+  type(c_ptr),save :: &
   & plan_g2r, & !< FFTW plan for F(G)e^{iGr} -> f(r) (backward)
   & plan_r2g !< FFTW plan for f(r)e^{-iGr} -> F(G) (forward)
   !
   integer,allocatable,save :: &
   & w2r(:) !< (g_wf%npw) g_wf%npw -> g_rh%nr
   !
-  complex(8),allocatable,save :: &
+  complex(c_double_complex),allocatable,save :: &
   & fft_in(:), & !< (g_rh%nr) FFT buffer
   & fft_out(:) !< (g_rh%nr) FFT buffer
-  !
-  include "fftw3.f"
   !
   private plan_g2r, plan_r2g, fft_in, fft_out
   !
@@ -24,16 +26,17 @@ contains
     use gvec, only : g_rh, g_wf
     !
     integer :: ipw, igv(3)
+    integer(c_int) :: fftwdim(3)
+    !
+    fftwdim(1:3) = (/g_rh%nft(3), g_rh%nft(2), g_rh%nft(1)/)
     !
     allocate(fft_in(g_rh%nr), fft_out(g_rh%nr))
     !
-    call dfftw_plan_dft_3d(plan_G2r, g_rh%nft(1), g_rh%nft(2), g_rh%nft(3), &
-    &                      fft_in, fft_out, &
-    &                      fftw_backward, fftw_estimate)
+    plan_G2r = fftw_plan_dft(3, fftwdim, fft_in, fft_out, &
+    &                        fftw_backward, fftw_estimate)
     !
-    call dfftw_plan_dft_3d(plan_r2G, g_rh%nft(1), g_rh%nft(2), g_rh%nft(3), &
-    &                      fft_in, fft_out, &
-    &                      fftw_forward, fftw_estimate)
+    plan_r2G = fftw_plan_dft(3, fftwdim, fft_in, fft_out, &
+    &                        fftw_forward, fftw_estimate)
     !
     allocate(w2r(g_wf%npw))
     do ipw = 1, g_wf%npw
@@ -54,7 +57,7 @@ contains
     complex(8),intent(out) :: VlocG(g_rh%nr)
     !
     fft_in(1:g_rh%nr) = VlocR(1:g_rh%nr)
-    call dfftw_execute_dft(plan_r2g, fft_in, fft_out)
+    call fftw_execute_dft(plan_r2g, fft_in, fft_out)
     VlocG(1:g_rh%nr) = fft_out(1:g_rh%nr) / dble(g_rh%nr)
     !
   end subroutine fft_r2g
@@ -69,7 +72,7 @@ contains
     real(8),intent(out) :: VlocR(g_rh%nr)
     !
     fft_in(1:g_rh%nr) = VlocG(1:g_rh%nr)
-    call dfftw_execute_dft(plan_g2r, fft_in, fft_out)
+    call fftw_execute_dft(plan_g2r, fft_in, fft_out)
     VlocR(1:g_rh%nr) = dble(fft_out(1:g_rh%nr))
     !
   end subroutine fft_g2r
@@ -85,7 +88,7 @@ contains
     complex(8),intent(out) :: wfG(g_wf%npw)
     !
     fft_in(1:g_rh%nr) = wfR(1:g_rh%nr)
-    call dfftw_execute_dft(plan_r2g, fft_in, fft_out)
+    call fftw_execute_dft(plan_r2g, fft_in, fft_out)
     wfG(1:g_wf%npw) = fft_out(w2r(1:g_wf%npw)) * sqrt(Vcell) / dble(g_rh%nr)
     !
   end subroutine fft_r2g_w
@@ -102,7 +105,7 @@ contains
     !
     fft_in(1:g_rh%nr) = 0.0d0
     fft_in(w2r(1:g_wf%npw)) = wfG(1:g_wf%npw)
-    call dfftw_execute_dft(plan_g2r, fft_in, fft_out)
+    call fftw_execute_dft(plan_g2r, fft_in, fft_out)
     wfR(1:g_rh%nr) = fft_out(1:g_rh%nr) / sqrt(Vcell)
     !
   end subroutine fft_g2r_w

@@ -17,56 +17,50 @@ contains
     use constant, only : htr2ev
     !
     integer :: istep, jstep
-    real(8) :: alpha, res
-    real(8),allocatable :: jacob1(:,:), jacob2(:,:), rhs0(:), dVks(:), rhs(:), drhs(:)
+    logical :: linit
+    real(8) :: alpha, res, &
+    &          Fvec0(g_rh%nr), dVks(g_rh%nr), Fvec(g_rh%nr), dFvec(g_rh%nr), &
+    &          jacob1(g_rh%nr,2:electron_maxstep), jacob2(g_rh%nr,2:electron_maxstep)
     !
-    allocate(rhs0(g_rh%nr),dVks(g_rh%nr),rhs(g_rh%nr), drhs(g_rh%nr), &
-    &        jacob1(g_rh%nr,electron_maxstep), jacob2(g_rh%nr,electron_maxstep))
-    !
-    istep = 0
-    write(*,*) "  Iteration ", istep
-    !
-    call kohn_sham_eq(.true., rhs)
-    res = sqrt(dot_product(rhs(1:g_rh%nr), rhs(1:g_rh%nr))) / dble(g_rh%nr)
-    write(*,*) "    delta Vks [eV] : ", res * htr2eV
-    !
-    if(res < conv_thr) electron_maxstep = 0
-    !
-    dVks(1:g_rh%nr) = - mixing_beta * rhs(1:g_rh%nr)
+    linit = .true.
     !
     do istep = 1, electron_maxstep
        !
        write(*,*) "  Iteration ", istep
        !
-       Vks(1:g_rh%nr) = Vks(1:g_rh%nr) + dVks(1:g_rh%nr)
-       !
-       rhs0(1:g_rh%nr) = rhs(1:g_rh%nr)
-       call kohn_sham_eq(.false., rhs)
-       res = sqrt(dot_product(rhs(1:g_rh%nr), rhs(1:g_rh%nr))) / dble(g_rh%nr)
+       call kohn_sham_eq(linit, Fvec)
+       linit = .false.
+       res = sqrt(dot_product(Fvec(1:g_rh%nr), Fvec(1:g_rh%nr))) / dble(g_rh%nr)
        write(*,*) "    delta Vks [eV] : ", res * htr2eV
-       !
        if(res < conv_thr) exit
        !
-       ! Update Jacobian with drhs
+       if(istep > 1) then
+          !
+          ! Update Jacobian with dFvec
+          !
+          dFvec(1:g_rh%nr) = Fvec(1:g_rh%nr) - Fvec0(1:g_rh%nr)
+          !
+          jacob1(1:g_rh%nr,istep) = mixing_beta * dFvec(1:g_rh%nr) + dVks(1:g_rh%nr)
+          do jstep = 2, istep - 1
+             alpha = dot_product(jacob2(1:g_rh%nr,jstep), dFvec(1:g_rh%nr))
+             jacob1(1:g_rh%nr,istep) = jacob1(1:g_rh%nr,istep) - jacob1(1:g_rh%nr,jstep) * alpha
+          end do
+          !
+          alpha = dot_product(dFvec(1:g_rh%nr), dFvec(1:g_rh%nr))
+          jacob2(1:g_rh%nr,istep) = dFvec(1:g_rh%nr) / alpha
+          !
+       end if
        !
-       drhs(1:g_rh%nr) = rhs(1:g_rh%nr) - rhs0(1:g_rh%nr)
+       ! Compute dVks with new Jacobian & Fvec
        !
-       jacob1(1:g_rh%nr,istep) = - mixing_beta * drhs(1:g_rh%nr)
-       do jstep = 1, istep - 1
-          alpha = dot_product(jacob2(1:g_rh%nr,jstep), drhs(1:g_rh%nr))
-          jacob1(1:g_rh%nr,istep) = jacob1(1:g_rh%nr,istep) - jacob1(1:g_rh%nr,jstep) * alpha
-       end do
-       jacob1(1:g_rh%nr,istep) = dVks(1:g_rh%nr) + jacob1(1:g_rh%nr,istep)
-       alpha = dot_product(drhs(1:g_rh%nr), drhs(1:g_rh%nr))
-       jacob2(1:g_rh%nr,istep) = drhs(1:g_rh%nr) / alpha
-       !
-       ! Compute dVks with new Jacobian & rhs
-       !
-       dVks(1:g_rh%nr) = - mixing_beta * rhs(1:g_rh%nr)
-       do jstep = 1, istep
-          alpha = dot_product(jacob2(1:g_rh%nr,jstep), rhs(1:g_rh%nr))
+       dVks(1:g_rh%nr) = mixing_beta * Fvec(1:g_rh%nr)
+       do jstep = 2, istep
+          alpha = dot_product(jacob2(1:g_rh%nr,jstep), Fvec(1:g_rh%nr))
           dVks(1:g_rh%nr) = dVks(1:g_rh%nr) - jacob1(1:g_rh%nr,jstep) * alpha 
        end do
+       Fvec0(1:g_rh%nr) = Fvec(1:g_rh%nr)
+       !
+       Vks(1:g_rh%nr) = Vks(1:g_rh%nr) + dVks(1:g_rh%nr)
        !
     end do ! istep
     !
@@ -80,7 +74,7 @@ contains
   !
   !
   !
-  subroutine kohn_sham_eq(linit,rhs)
+  subroutine kohn_sham_eq(linit,Fvec)
     !
     use gvec, only : g_wf, g_rh
     use kohn_sham, only : nbnd, eval, evec, calculation
@@ -90,7 +84,7 @@ contains
     use lobpcg, only : lobpcg_main
     !
     logical,intent(in) :: linit
-    real(8),intent(out) :: rhs(g_rh%nr)
+    real(8),intent(out) :: Fvec(g_rh%nr)
     !
     integer :: ik, istep, avestep
     !
@@ -115,14 +109,14 @@ contains
        !
        call ksum_rho()
        !
-       rhs(1:g_rh%nr) = Vps(1:g_rh%nr)
-       call hartree_pot(rhs)
-       call xc_pot(rhs)
+       Fvec(1:g_rh%nr) = Vps(1:g_rh%nr)
+       call hartree_pot(Fvec)
+       call xc_pot(Fvec)
        !
-       rhs(1:g_rh%nr) = Vks(1:g_rh%nr) - rhs(1:g_rh%nr)
+       Fvec(1:g_rh%nr) = Fvec(1:g_rh%nr) - Vks(1:g_rh%nr)
        !
     else
-       rhs(1:g_rh%nr) = 0.0d0
+       Fvec(1:g_rh%nr) = 0.0d0
     end if
     !
   end subroutine kohn_sham_eq
