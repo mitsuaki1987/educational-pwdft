@@ -1,5 +1,5 @@
 &control
- calculation = 'scf'
+ calculation = 'nscf'
 /
 &system
        nat = 2, 

@@ -3,7 +3,7 @@ module griddata
   implicit none
   !
 contains
-    !>
+  !>
   !! Read unit-cell grid data such as Vks
   !!
   subroutine read_griddata(filename, gdata)
