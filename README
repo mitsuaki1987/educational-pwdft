@@ -3,9 +3,26 @@ PW-DFT
 Sample DFT code for the lecture "Numerical Algebra for Materials Science"
 based on the plane wave and pseudopotential.
 
+Thee Local Pseudotential in the Carter group
+https://carter.princeton.edu/research/local-pseudopotentials/
+is employed.
+
 # Contents
 
 * src/ : Source code directory
+* sample/ : Sample input file
+* doc/ : Input for Doxygen
 
 # Compile
 
+For GCC in Linux
+$ cp make.inc.in make.in
+$ make
+
+For GCC in macos
+$ cp make.inc.mac make.in
+$ make
+
+# Source browser
+
+http://mitsuaki1987.github.io/pwdft/index.html
