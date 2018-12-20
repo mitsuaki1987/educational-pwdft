@@ -22,7 +22,7 @@ contains
     real(8) :: occ(nbnd,nk)
     complex(8) :: psir(g_rh%nr)
     !
-    CALL libtetrabz_fermieng(2,bvec,nbnd,kgrd,eval,kgrd,occ,ef,nelec*0.5d0)
+    call libtetrabz_fermieng(2,bvec,nbnd,kgrd,eval,kgrd,occ,ef,nelec*0.5d0)
     !
     rho(1:g_rh%nr) = 0.0d0
     do ik = 1, nk

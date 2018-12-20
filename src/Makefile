@@ -4,6 +4,7 @@ OBJS=\
 atm_spec.o \
 constant.o \
 diag_direct.o \
+energy.o \
 fftw_wrapper.o \
 griddata.o \
 gvec.o \

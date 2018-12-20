@@ -18,6 +18,7 @@ program pwdft
   use fftw_wrapper, only : init_fft
   use griddata, only : read_griddata, write_griddata
   use plot, only : fermi_plot, band_plot
+  use energy, only : total_e
   !
   implicit none
   !
@@ -41,6 +42,8 @@ program pwdft
      call scf_loop()
      call cpu_time(t4)
      write(*,*) "  SCF time : ", t4 - t3, " sec"
+     !
+     call total_e()
      !
      Vks(1:g_rh%nr) = (Vks(1:g_rh%nr) - ef)*htr2ev
      call write_griddata("vks.xsf", Vks)
