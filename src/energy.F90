@@ -271,7 +271,7 @@ contains
     end do
     Exc = Exc * Vcell / dble(g_rh%nr)
     !
-    write(*,*) "    rho*V : ", Exc*htr2ev
+    write(*,*) "    XC energy : ", Exc*htr2ev
     Etot = Etot + Exc
     !
   end subroutine xc
