@@ -5,3 +5,4 @@ make.inc
 *~
 doc/html/
 *.a
+tool/__pycache__

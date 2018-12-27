@@ -155,7 +155,7 @@ contains
        norm = sqrt(dot_product(bvec(1:3,ii), bvec(1:3,ii)))
        eta = eta + norm
     end do
-    eta = eta / 3.0d0
+    eta = eta / 3.0d0 / sqrt(2.0d0) / sqrt(2.0d0*pi)
     write(*,*) "      Ewald eta [Bohr^-1] : ", eta
     !
     ! Reciprocal space
@@ -232,7 +232,7 @@ contains
        !
     end do
     !
-    write(*,*) "    Eward energy : ", Eew*htr2ev
+    write(*,*) "    Ewald energy : ", Eew*htr2ev
     Etot = Etot + Eew
     !
   end subroutine ewald
