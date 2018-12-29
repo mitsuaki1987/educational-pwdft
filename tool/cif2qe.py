@@ -141,13 +141,12 @@ if __name__ == '__main__':
     #
     # nscf.in : Dense k grid
     #
-    with open("nscf.in", 'w') as f:
+    with open("dense.in", 'w') as f:
         print("&CONTROL", file=f)
         print(" calculation = \'nscf\'", file=f)
         write_middle(f, nat, ntyp, ecutwfc, ecutrho, psdir)
         print(" occupations = \'tetrahedra_opt\'", file=f)
         print("        nbnd = %d" % nbnd, file=f)
-        print("        la2f = .true.", file=f)
         print("/", file=f)
         print("&ELECTRONS", file=f)
         print("/", file=f)
@@ -155,9 +154,9 @@ if __name__ == '__main__':
         print("K_POINTS automatic", file=f)
         print(" %d %d %d 0 0 0" % (nk[0]*2, nk[1]*2, nk[2]*2), file=f)
     #
-    # band.in : Plot band
+    # nonscf.in : Plot band
     #
-    with open("band.in", 'w') as f:
+    with open("nonscf.in", 'w') as f:
         print("&CONTROL", file=f)
         print(" calculation = \'bands\'", file=f)
         write_middle(f, nat, ntyp, ecutwfc, ecutrho, psdir)
@@ -184,7 +183,7 @@ if __name__ == '__main__':
     #
     # proj.in : Read by projwfc.x
     #
-    with open("proj.in", 'w') as f:
+    with open("pdos.in", 'w') as f:
         print("&PROJWFC", file=f)
         print("      emin = ", file=f)
         print("      emax = ", file=f)
