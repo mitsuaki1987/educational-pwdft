@@ -1,0 +1,10 @@
+digraph "libtetrabz_common::libtetrabz_mpisum_zv"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="RL";
+  Node1 [label="libtetrabz_common::\llibtetrabz_mpisum_zv",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="libtetrabz_polcmplx\l_mod::libtetrabz_polcmplx",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__polcmplx__mod.html#a73bf8fbec1f14bacdd14c57df3fb1498",tooltip=" "];
+}

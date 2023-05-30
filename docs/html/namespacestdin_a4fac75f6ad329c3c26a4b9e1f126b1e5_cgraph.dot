@@ -1,0 +1,12 @@
+digraph "stdin::read_stdin"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="stdin::read_stdin",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="gvec::setup_gvec",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacegvec.html#aa8e7844c18eedb0b456459e53e3035af",tooltip=" "];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="gvec::base2357",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacegvec.html#a36b5f8e726c0aa55b2680cde20f6d1d3",tooltip=" "];
+}

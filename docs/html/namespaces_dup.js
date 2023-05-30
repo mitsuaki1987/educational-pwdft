@@ -1,0 +1,28 @@
+var namespaces_dup =
+[
+    [ "atm_spec", "namespaceatm__spec.html", null ],
+    [ "constant", "namespaceconstant.html", null ],
+    [ "diag_direct", "namespacediag__direct.html", null ],
+    [ "energy", "namespaceenergy.html", null ],
+    [ "fftw_wrapper", "namespacefftw__wrapper.html", null ],
+    [ "griddata", "namespacegriddata.html", null ],
+    [ "gvec", "namespacegvec.html", null ],
+    [ "hamiltonian", "namespacehamiltonian.html", null ],
+    [ "k_point", "namespacek__point.html", null ],
+    [ "kohn_sham", "namespacekohn__sham.html", null ],
+    [ "libtetrabz", "namespacelibtetrabz.html", null ],
+    [ "libtetrabz_common", "namespacelibtetrabz__common.html", null ],
+    [ "libtetrabz_dbldelta_mod", "namespacelibtetrabz__dbldelta__mod.html", null ],
+    [ "libtetrabz_dblstep_mod", "namespacelibtetrabz__dblstep__mod.html", null ],
+    [ "libtetrabz_dos_mod", "namespacelibtetrabz__dos__mod.html", null ],
+    [ "libtetrabz_fermigr_mod", "namespacelibtetrabz__fermigr__mod.html", null ],
+    [ "libtetrabz_occ_mod", "namespacelibtetrabz__occ__mod.html", null ],
+    [ "libtetrabz_polcmplx_mod", "namespacelibtetrabz__polcmplx__mod.html", null ],
+    [ "libtetrabz_polstat_mod", "namespacelibtetrabz__polstat__mod.html", null ],
+    [ "lobpcg", "namespacelobpcg.html", null ],
+    [ "plot", "namespaceplot.html", null ],
+    [ "pp", "namespacepp.html", null ],
+    [ "rho_v", "namespacerho__v.html", null ],
+    [ "scf", "namespacescf.html", null ],
+    [ "stdin", "namespacestdin.html", null ]
+];

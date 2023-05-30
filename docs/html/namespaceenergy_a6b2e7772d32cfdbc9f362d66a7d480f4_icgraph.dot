@@ -1,0 +1,12 @@
+digraph "energy::kinetic"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="RL";
+  Node1 [label="energy::kinetic",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="energy::total_e",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespaceenergy.html#a97d52dc46c4ed4bc286f4108f3391a7c",tooltip=" "];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="pwdft",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$pwdft_8_f90.html#a676d884bb05028d628a63337b149182e",tooltip=" "];
+}

@@ -1,0 +1,24 @@
+digraph "libtetrabz_common::libtetrabz_triangle_a1"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="RL";
+  Node1 [label="libtetrabz_common::\llibtetrabz_triangle_a1",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="libtetrabz_dbldelta\l_mod::libtetrabz_dbldelta_main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__dbldelta__mod.html#ad466e189eee97447b95457101e293ddc",tooltip=" "];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="libtetrabz_dbldelta\l_mod::libtetrabz_dbldelta",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__dbldelta__mod.html#a39497cb566e75ffe9b0969a7f39ab6d0",tooltip=" "];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="libtetrabz_dos_mod\l::libtetrabz_dos_main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__dos__mod.html#a5bfd2bd5acf59cadfa9a4ebbff79ded5",tooltip=" "];
+  Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="libtetrabz_dos_mod\l::libtetrabz_dos",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__dos__mod.html#addb2ff4ca41802364a279d3401ae67a0",tooltip=" "];
+  Node1 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr3",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__fermigr__mod.html#a0108d9f5ebc27b676cb79d424c30922d",tooltip=" "];
+  Node6 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr2",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__fermigr__mod.html#acdf3fc0ae7c7d3b2668da34480d2799f",tooltip=" "];
+  Node7 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr_main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__fermigr__mod.html#a83cd93298b6fc3d5835ec48c0ebf2c8d",tooltip=" "];
+  Node8 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__fermigr__mod.html#a6736ccb707472d31ccbaef4b800cdd3d",tooltip=" "];
+}

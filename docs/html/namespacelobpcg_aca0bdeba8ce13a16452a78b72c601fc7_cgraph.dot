@@ -1,0 +1,16 @@
+digraph "lobpcg::lobpcg_main"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="lobpcg::lobpcg_main",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="lobpcg::diag_ovrp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelobpcg.html#a8327b59ba46696af992e3139ea672cb0",tooltip=" "];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="hamiltonian::h_psi",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacehamiltonian.html#a4807e245c5bd29b02c24a6e433d84d69",tooltip=" "];
+  Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="fftw_wrapper::fft_g2r_w",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacefftw__wrapper.html#a25b8d74f9da100bc316583f5d16386fb",tooltip="Uncompress -> W(G) e^{iGr} -> w(r)"];
+  Node3 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="fftw_wrapper::fft_r2g_w",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacefftw__wrapper.html#af861010299040222db53144805b80335",tooltip="w(r) e^{-iGr} -> W(G) -> compress"];
+}

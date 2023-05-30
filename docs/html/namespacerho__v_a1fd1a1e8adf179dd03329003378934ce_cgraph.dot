@@ -1,0 +1,12 @@
+digraph "rho_v::hartree_pot"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="rho_v::hartree_pot",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Add Hartree potential."];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="fftw_wrapper::fft_g2r",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacefftw__wrapper.html#a340a66d2b418bc01bca7b91941b55c1c",tooltip="V(G) e^{iGr} -> v(r)"];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="fftw_wrapper::fft_r2g",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacefftw__wrapper.html#ac203731bd91598ef6e719a0822135961",tooltip="v(r) e^{-iGr} -> V(G)"];
+}

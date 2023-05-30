@@ -1,0 +1,14 @@
+digraph "libtetrabz_fermigr_mod::libtetrabz_fermigr3"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="RL";
+  Node1 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr3",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr2",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__fermigr__mod.html#acdf3fc0ae7c7d3b2668da34480d2799f",tooltip=" "];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr_main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__fermigr__mod.html#a83cd93298b6fc3d5835ec48c0ebf2c8d",tooltip=" "];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="libtetrabz_fermigr\l_mod::libtetrabz_fermigr",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__fermigr__mod.html#a6736ccb707472d31ccbaef4b800cdd3d",tooltip=" "];
+}

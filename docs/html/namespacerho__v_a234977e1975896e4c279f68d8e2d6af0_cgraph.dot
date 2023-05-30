@@ -1,0 +1,19 @@
+digraph "rho_v::init_rho_v"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="rho_v::init_rho_v",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Initialize rho, Vps, Vks."];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="rho_v::generate_vps",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacerho__v.html#a3813003555dcf513988a47b2e5e49c8f",tooltip="Pseudopotential Vps is computed."];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="fftw_wrapper::fft_g2r",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacefftw__wrapper.html#a340a66d2b418bc01bca7b91941b55c1c",tooltip="V(G) e^{iGr} -> v(r)"];
+  Node1 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="rho_v::hartree_pot",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacerho__v.html#a1fd1a1e8adf179dd03329003378934ce",tooltip="Add Hartree potential."];
+  Node4 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="fftw_wrapper::fft_r2g",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacefftw__wrapper.html#ac203731bd91598ef6e719a0822135961",tooltip="v(r) e^{-iGr} -> V(G)"];
+  Node1 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="rho_v::xc_pot",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacerho__v.html#abfb155a2cad76c42f2b470f2db1a8404",tooltip="Add XC potential (LDA)"];
+}

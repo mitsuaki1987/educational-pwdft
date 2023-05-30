@@ -1,0 +1,23 @@
+digraph "fftw_wrapper::fft_g2r"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="RL";
+  Node1 [label="fftw_wrapper::fft_g2r",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="V(G) e^{iGr} -> v(r)"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="rho_v::generate_vps",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacerho__v.html#a3813003555dcf513988a47b2e5e49c8f",tooltip="Pseudopotential Vps is computed."];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="rho_v::init_rho_v",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacerho__v.html#a234977e1975896e4c279f68d8e2d6af0",tooltip="Initialize rho, Vps, Vks."];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="pwdft",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$pwdft_8_f90.html#a676d884bb05028d628a63337b149182e",tooltip=" "];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="rho_v::hartree_pot",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacerho__v.html#a1fd1a1e8adf179dd03329003378934ce",tooltip="Add Hartree potential."];
+  Node5 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="scf::kohn_sham_eq",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacescf.html#a80161e4666bf654ff41c0ad5510f0641",tooltip=" "];
+  Node6 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="scf::scf_loop",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacescf.html#ab2a6afb38024f53beb2371ef1d7163a1",tooltip=" "];
+  Node7 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

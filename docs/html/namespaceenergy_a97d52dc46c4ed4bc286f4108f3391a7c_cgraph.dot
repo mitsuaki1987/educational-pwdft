@@ -1,0 +1,20 @@
+digraph "energy::total_e"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="energy::total_e",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="energy::atomic",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespaceenergy.html#aefdfd6e55601fed4b1d9a6ae164edc57",tooltip=" "];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="energy::ewald",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespaceenergy.html#ac3f5cf30401d776c48d2494e25025059",tooltip=" "];
+  Node1 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="energy::hartree",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespaceenergy.html#aeb8d9d19c7699397d064970c237545d9",tooltip=" "];
+  Node4 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="fftw_wrapper::fft_r2g",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacefftw__wrapper.html#ac203731bd91598ef6e719a0822135961",tooltip="v(r) e^{-iGr} -> V(G)"];
+  Node1 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="energy::kinetic",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespaceenergy.html#a6b2e7772d32cfdbc9f362d66a7d480f4",tooltip=" "];
+  Node1 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="energy::xc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespaceenergy.html#afb37b788a743ea33f40f841ad9a0fdc7",tooltip=" "];
+}

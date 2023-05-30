@@ -1,0 +1,14 @@
+digraph "libtetrabz_polcmplx_mod::libtetrabz_polcmplx3"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="RL";
+  Node1 [label="libtetrabz_polcmplx\l_mod::libtetrabz_polcmplx3",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="libtetrabz_polcmplx\l_mod::libtetrabz_polcmplx2",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__polcmplx__mod.html#aebb4320b6be485d29f977d92703d5406",tooltip=" "];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="libtetrabz_polcmplx\l_mod::libtetrabz_polcmplx_main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__polcmplx__mod.html#a303cfea5055930f1e7ae4238a9a8f0ec",tooltip=" "];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="libtetrabz_polcmplx\l_mod::libtetrabz_polcmplx",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$namespacelibtetrabz__polcmplx__mod.html#a73bf8fbec1f14bacdd14c57df3fb1498",tooltip=" "];
+}
